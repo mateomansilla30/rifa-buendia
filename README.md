@@ -43,6 +43,14 @@ El mismo repo se puede deployar en Vercel como **solo front**: la base y la API 
 
 Sin `BACKEND_URL` la app es la completa (front + API + base), que es lo que corre en el VPS.
 
+## Me olvidé la clave del admin
+
+`ADMIN_USER` / `ADMIN_PASSWORD` solo crean el admin en el primer arranque. Para resetearla sin perder datos:
+
+1. En Environment poné `ADMIN_USER`, el `ADMIN_PASSWORD` nuevo y `RESET_ADMIN_PASSWORD=1`. Sin comillas.
+2. Deploy y entrá con esa clave.
+3. Sacá `RESET_ADMIN_PASSWORD` y volvé a deployar (si queda, en cada arranque vuelve a pisar la clave que cambies desde Ajustes).
+
 ## Primer uso
 
 1. Entrá con el admin.

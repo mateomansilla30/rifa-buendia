@@ -104,6 +104,13 @@ export function bootstrap(db: DB, env: NodeJS.ProcessEnv = process.env) {
     db.prepare("INSERT INTO users (username, name, role, secret_hash) VALUES (?, ?, 'admin', ?)").run(
       user, user.charAt(0).toUpperCase() + user.slice(1), hashSecret(pass),
     );
+  } else if (env.RESET_ADMIN_PASSWORD === "1" && env.ADMIN_PASSWORD) {
+    // Recuperación: deja ADMIN_USER como admin activo con ADMIN_PASSWORD. Sacar la variable después.
+    const user = env.ADMIN_USER || "admin";
+    const hash = hashSecret(env.ADMIN_PASSWORD);
+    const updated = db.prepare("UPDATE users SET secret_hash = ?, role = 'admin', active = 1 WHERE username = ?").run(hash, user);
+    if (!updated.changes) db.prepare("INSERT INTO users (username, name, role, secret_hash) VALUES (?, ?, 'admin', ?)").run(user, user, hash);
+    console.warn(`[rifa] Contraseña del admin "${user}" reseteada desde ADMIN_PASSWORD. Quitá RESET_ADMIN_PASSWORD.`);
   }
   const hasRaffle = db.prepare("SELECT 1 FROM raffles").get();
   if (!hasRaffle) {

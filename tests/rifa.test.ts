@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bootstrap, openDb } from "@/lib/db";
+import { bootstrap, checkSecret, openDb } from "@/lib/db";
 import { buildImageModel, freeNumbers } from "@/lib/image-model";
 import { parseImport } from "@/lib/importer";
 import { createSales, getActiveRaffle, listSales, releaseSale, SaleError, updateSale } from "@/lib/sales";
@@ -55,6 +55,18 @@ describe("ventas", () => {
     createSales(db, raffle, [3], { buyer_name: "Otra" }, 1);
     const actions = (db.prepare("SELECT action FROM audit WHERE number = 3 ORDER BY id").all() as { action: string }[]).map((a) => a.action);
     expect(actions).toEqual(["alta", "pago", "liberación", "alta"]);
+  });
+});
+
+describe("admin", () => {
+  it("RESET_ADMIN_PASSWORD cambia la clave del admin existente", () => {
+    const { db } = setup();
+    const env = (pass: string, reset = "") => ({ ADMIN_USER: "admin", ADMIN_PASSWORD: pass, RESET_ADMIN_PASSWORD: reset }) as unknown as NodeJS.ProcessEnv;
+    const hash = () => (db.prepare("SELECT secret_hash FROM users WHERE username = 'admin'").get() as { secret_hash: string }).secret_hash;
+    bootstrap(db, env("otra-clave")); // sin reset no toca nada
+    expect(checkSecret("secreto123", hash())).toBe(true);
+    bootstrap(db, env("nueva-clave-1", "1"));
+    expect(checkSecret("nueva-clave-1", hash())).toBe(true);
   });
 });
 
