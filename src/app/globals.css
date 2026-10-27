@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
+/* Tema "Saffron Light" de 21st.dev (serafimcloud). Radio subido a 0.75rem para pantallas táctiles. */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
+  --card: #fafafa;
+  --card-foreground: #1f1f1f;
+  --popover: #fdfdfc;
+  --popover-foreground: #1f1f1f;
+  --primary: #fa7d00;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #262626;
+  --muted: #f5f5f5;
+  --muted-foreground: #595959;
+  --accent: #fef3e7;
+  --accent-foreground: #b35900;
+  --destructive: #e7000b;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #dcd9d0;
+  --ring: #fa7d00;
+  --radius: 0.75rem;
+
+  /* estados de los números */
+  --libre: #ffffff;
+  --reservado: #fde68a;
+  --reservado-foreground: #78350f;
+  --pagado: #34b25e;
+  --pagado-foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-libre: var(--libre);
+  --color-reservado: var(--reservado);
+  --color-reservado-foreground: var(--reservado-foreground);
+  --color-pagado: var(--pagado);
+  --color-pagado-foreground: var(--pagado-foreground);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-heading);
+  }
 }
