@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { dateTime, money } from "@/lib/format";
+import { priceOf, promoLabel } from "@/lib/summary";
 import type { AuditEntry, Sale } from "@/lib/types";
 import { api, useRifa } from "./rifa-provider";
 import { SaleForm } from "./sale-form";
@@ -72,6 +73,12 @@ export function SaleDetail({ sale, onDone }: { sale: Sale; onDone: () => void })
           <dt className="text-xs text-muted-foreground">Vendido por</dt>
           <dd className="font-medium">{seller?.name ?? "Sin vendedor"}</dd>
         </div>
+        {sale.promo && state.raffle?.promo_qty ? (
+          <div>
+            <dt className="text-xs text-muted-foreground">Precio</dt>
+            <dd className="font-medium">Promo {promoLabel(state.raffle)}</dd>
+          </div>
+        ) : null}
         <div>
           <dt className="text-xs text-muted-foreground">Cargado</dt>
           <dd className="font-medium">{dateTime(sale.created_at)}</dd>
@@ -97,7 +104,7 @@ export function SaleDetail({ sale, onDone }: { sale: Sale; onDone: () => void })
       ) : (
         <div className="grid gap-2">
           {!sale.paid && (
-            <Button size="lg" className="bg-pagado hover:bg-pagado/90" onClick={() => save({ ...base, paid: true }, `¡El ${sale.number} quedó pagado! (${money(state.raffle?.price ?? 0)})`)}>
+            <Button size="lg" className="bg-pagado hover:bg-pagado/90" onClick={() => save({ ...base, paid: true }, `¡El ${sale.number} quedó pagado! (${state.raffle ? money(priceOf(state.raffle, sale)) : ""})`)}>
               <CheckCircle2 /> Marcar como pagado
             </Button>
           )}

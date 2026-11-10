@@ -1,6 +1,7 @@
 // Dibuja en un canvas el modelo de lib/image-model.ts. Todo del lado del cliente.
 import { date, money } from "@/lib/format";
 import type { buildImageModel } from "@/lib/image-model";
+import { promoLabel } from "@/lib/summary";
 import type { Raffle } from "@/lib/types";
 
 export interface Palette {
@@ -95,7 +96,7 @@ export function drawRaffleImage(
   ctx.roundRect(0, 0, W, bandH, [0, 0, 48, 48]);
   ctx.fill();
 
-  const info = [raffle.price ? `${money(raffle.price)} el número` : "", raffle.draw_date ? `Sorteo ${date(raffle.draw_date)}` : ""].filter(Boolean).join("  ·  ");
+  const info = [raffle.price ? `${money(raffle.price)} el número` : "", promoLabel(raffle) && `Promo ${promoLabel(raffle)}`, raffle.draw_date ? `Sorteo ${date(raffle.draw_date)}` : ""].filter(Boolean).join("  ·  ");
   const alias = raffle.alias ? `Alias: ${raffle.alias}` : "";
   ctx.textBaseline = "top";
 

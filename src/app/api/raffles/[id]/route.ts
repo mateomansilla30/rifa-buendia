@@ -28,6 +28,6 @@ export const PATCH = handle(async (req: Request, { params }: Ctx) => {
   if (outside.n) throw new HttpError(400, `Hay ${outside.n} número(s) vendidos fuera del nuevo rango`);
   db.prepare(
     `UPDATE raffles SET name=@name, prize=@prize, price=@price, draw_date=@draw_date, alias=@alias,
-     min_number=@min_number, max_number=@max_number WHERE id=@id`,
+     min_number=@min_number, max_number=@max_number, promo_qty=@promo_qty, promo_price=@promo_price WHERE id=@id`,
   ).run({ ...f, id });
 });

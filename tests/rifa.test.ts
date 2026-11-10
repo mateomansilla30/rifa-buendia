@@ -3,7 +3,7 @@ import { bootstrap, checkSecret, openDb } from "@/lib/db";
 import { buildImageModel, freeNumbers } from "@/lib/image-model";
 import { parseImport } from "@/lib/importer";
 import { createSales, getActiveRaffle, listSales, releaseSale, SaleError, updateSale } from "@/lib/sales";
-import { computeSummary } from "@/lib/summary";
+import { batchTotal, computeSummary } from "@/lib/summary";
 import type { Raffle, Sale } from "@/lib/types";
 
 function setup() {
@@ -55,6 +55,21 @@ describe("ventas", () => {
     createSales(db, raffle, [3], { buyer_name: "Otra" }, 1);
     const actions = (db.prepare("SELECT action FROM audit WHERE number = 3 ORDER BY id").all() as { action: string }[]).map((a) => a.action);
     expect(actions).toEqual(["alta", "pago", "liberación", "alta"]);
+  });
+
+  it("promo 3 × $10.000: solo los packs completos van en promo y el resumen cobra bien", () => {
+    const { db } = setup();
+    db.prepare("UPDATE raffles SET price = 3000, promo_qty = 3, promo_price = 10000").run();
+    const raffle = getActiveRaffle(db)!;
+    expect(batchTotal(raffle, 4)).toBe(13000);
+    const sales = createSales(db, raffle, [10, 11, 12, 13], { buyer_name: "Juan", paid: true }, 1);
+    expect(sales.map((s) => s.promo)).toEqual([1, 1, 1, 0]);
+    createSales(db, raffle, [20, 21], { buyer_name: "Ana" }, 1); // 2 no llegan a la promo
+    const s = computeSummary(raffle, listSales(db, raffle.id), []);
+    expect(Math.round(s.collected)).toBe(13000);
+    expect(s.pending).toBe(6000);
+    // si sacan la promo, todo vuelve a precio normal
+    expect(computeSummary({ ...raffle, promo_qty: 0 }, listSales(db, raffle.id), []).collected).toBe(12000);
   });
 });
 

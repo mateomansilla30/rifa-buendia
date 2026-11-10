@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { useRifa } from "@/components/rifa-provider";
 import { StatsCard } from "@/components/ui/stats-card";
 import { money, pad } from "@/lib/format";
-import { computeSummary } from "@/lib/summary";
+import { computeSummary, priceOf } from "@/lib/summary";
 
 export default function ResumenPage() {
   const { state } = useRifa();
@@ -15,11 +15,12 @@ export default function ResumenPage() {
   const pct = Math.round((s.sold / s.total) * 100);
 
   // agrupar "falta cobrar" por persona, así se le cobra todo junto
-  const debtors = new Map<string, { name: string; contact: string; numbers: number[] }>();
+  const debtors = new Map<string, { name: string; contact: string; numbers: number[]; owes: number }>();
   for (const x of s.unpaid) {
     const key = `${x.buyer_name.toLowerCase()}|${x.contact}`;
-    const d = debtors.get(key) ?? { name: x.buyer_name, contact: x.contact, numbers: [] };
+    const d = debtors.get(key) ?? { name: x.buyer_name, contact: x.contact, numbers: [], owes: 0 };
     d.numbers.push(x.number);
+    d.owes += priceOf(raffle, x);
     debtors.set(key, d);
   }
 
@@ -41,7 +42,7 @@ export default function ResumenPage() {
         <section className="grid grid-cols-2 gap-3">
           <StatsCard title="Vendidos" value={String(s.sold)} hint={`${s.paid} pagados · ${s.reserved} reservados`} icon={<Ticket className={icon} />} />
           <StatsCard title="Libres" value={String(s.free)} hint={`de ${s.total} números`} icon={<Hash className={icon} />} />
-          <StatsCard title="Recaudado" value={money(s.collected)} tone="positive" hint={`${s.paid} × ${money(raffle.price)}`} icon={<Banknote className={icon} />} />
+          <StatsCard title="Recaudado" value={money(s.collected)} tone="positive" hint={`${s.paid} números pagados`} icon={<Banknote className={icon} />} />
           <StatsCard title="Falta cobrar" value={money(s.pending)} tone="warning" hint={`${s.reserved} números reservados`} icon={<Clock className={icon} />} />
           <StatsCard title="Si se cobra todo lo vendido" value={money(s.ifAllSoldPaid)} />
           <StatsCard title={`Si se venden los ${s.total}`} value={money(s.ifAllNumbersSold)} />
@@ -84,7 +85,7 @@ export default function ResumenPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{d.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {d.numbers.map((n) => pad(n, raffle.max_number)).join(", ")} · {money(d.numbers.length * raffle.price)}
+                    {d.numbers.map((n) => pad(n, raffle.max_number)).join(", ")} · {money(d.owes)}
                   </p>
                 </div>
                 {d.contact && (

@@ -11,7 +11,8 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Segmented } from "@/components/ui/segmented";
 import { norm } from "@/lib/importer";
-import { pad } from "@/lib/format";
+import { money, pad } from "@/lib/format";
+import { batchTotal, promoCount, promoLabel } from "@/lib/summary";
 import type { Sale } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,7 @@ export default function Board() {
   };
   const visible = all.filter((n) => matches(n, byNumber.get(n)));
   const paidCount = sales.filter((s) => s.paid).length;
+  const promo = promoLabel(raffle);
 
   function tap(n: number) {
     const s = byNumber.get(n);
@@ -124,6 +126,7 @@ export default function Board() {
       <p className="px-4 pt-3 text-xs text-muted-foreground">
         <b className="text-foreground">{all.length - sales.length}</b> libres · <b className="text-foreground">{sales.length - paidCount}</b> reservados · <b className="text-foreground">{paidCount}</b> pagados
         {selectMode && " · Tocá los libres que quieras cargar juntos"}
+        {promo && <> · <b className="text-primary">Promo {promo}</b>{!selectMode && ": usá “Elegir varios”"}</>}
       </p>
 
       {visible.length === 0 ? (
@@ -157,11 +160,18 @@ export default function Board() {
       )}
 
       {selectMode && selected.length > 0 && (
-        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-3xl gap-2 border-t bg-background p-3">
-          <Button variant="outline" size="lg" onClick={() => setSelected([])} aria-label="Limpiar selección"><X /></Button>
-          <Button size="lg" className="flex-1" onClick={() => setFormNumbers([...selected].sort((a, b) => a - b))}>
-            Cargar {selected.length} {selected.length === 1 ? "número" : "números"}
-          </Button>
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 mx-auto max-w-3xl space-y-2 border-t bg-background p-3">
+          {promo && selected.length % raffle.promo_qty !== 0 && (
+            <p className="text-center text-xs text-muted-foreground">
+              Elegí {raffle.promo_qty - (selected.length % raffle.promo_qty)} más para la promo {promo}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button variant="outline" size="lg" onClick={() => setSelected([])} aria-label="Limpiar selección"><X /></Button>
+            <Button size="lg" className="flex-1" onClick={() => setFormNumbers([...selected].sort((a, b) => a - b))}>
+              Cargar {selected.length} {selected.length === 1 ? "número" : "números"} · {money(batchTotal(raffle, selected.length))}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -169,7 +179,12 @@ export default function Board() {
         <DrawerContent
           className="max-h-[88dvh]"
           title={formNumbers && (formNumbers.length === 1 ? `Vender el ${pad(formNumbers[0], max)}` : `Vender ${formNumbers.length} números`)}
-          description={formNumbers && formNumbers.length > 1 ? formNumbers.map((n) => pad(n, max)).join(", ") : undefined}
+          description={
+            formNumbers &&
+            [formNumbers.length > 1 && formNumbers.map((n) => pad(n, max)).join(", "), money(batchTotal(raffle, formNumbers.length)) + (promoCount(raffle, formNumbers.length) ? " (con promo)" : "")]
+              .filter(Boolean)
+              .join(" · ")
+          }
         >
           {formNumbers && <SaleForm key={formNumbers.join()} submitLabel="Guardar venta" onSubmit={sell} />}
         </DrawerContent>

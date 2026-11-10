@@ -136,6 +136,8 @@ function RaffleForm({
     alias: raffle.alias,
     min_number: String(raffle.min_number),
     max_number: String(raffle.max_number),
+    promo_qty: raffle.promo_qty ? String(raffle.promo_qty) : "",
+    promo_price: raffle.promo_price ? String(raffle.promo_price) : "",
   });
   const field = (k: keyof typeof v, label: string, props: React.ComponentProps<"input"> = {}) => (
     <div>
@@ -149,7 +151,15 @@ function RaffleForm({
       className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
-        onSave({ ...v, price: Number(v.price), min_number: Number(v.min_number), max_number: Number(v.max_number), draw_date: v.draw_date || null });
+        onSave({
+          ...v,
+          price: Number(v.price),
+          min_number: Number(v.min_number),
+          max_number: Number(v.max_number),
+          promo_qty: Number(v.promo_qty || 0),
+          promo_price: Number(v.promo_price || 0),
+          draw_date: v.draw_date || null,
+        });
       }}
     >
       {field("name", "Nombre", { required: true })}
@@ -157,6 +167,10 @@ function RaffleForm({
       <div className="grid grid-cols-2 gap-3">
         {field("price", "Precio por número ($)", { inputMode: "numeric", pattern: "\\d*", required: true })}
         {field("draw_date", "Fecha del sorteo", { type: "date" })}
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {field("promo_qty", "Promo: cantidad", { inputMode: "numeric", pattern: "\\d*", placeholder: "Ej: 3 (vacío = sin promo)" })}
+        {field("promo_price", "Promo: precio ($)", { inputMode: "numeric", pattern: "\\d*", placeholder: "Ej: 10000", required: !!v.promo_qty })}
       </div>
       {field("alias", "Alias de cobro (Mercado Pago)", { autoCapitalize: "none" })}
       <div className="grid grid-cols-2 gap-3">

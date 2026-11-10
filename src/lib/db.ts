@@ -60,6 +60,11 @@ const MIGRATIONS = [
   );
   CREATE INDEX audit_raffle ON audit(raffle_id, number);
   `,
+  `
+  ALTER TABLE raffles ADD COLUMN promo_qty INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE raffles ADD COLUMN promo_price INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE sales ADD COLUMN promo INTEGER NOT NULL DEFAULT 0;
+  `,
 ];
 
 export function migrate(db: DB) {

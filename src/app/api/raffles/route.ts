@@ -18,8 +18,8 @@ export const POST = handle(async (req: Request) => {
   const f = raffleFields(await req.json());
   const { lastInsertRowid } = getDb()
     .prepare(
-      `INSERT INTO raffles (name, prize, price, draw_date, alias, min_number, max_number)
-       VALUES (@name, @prize, @price, @draw_date, @alias, @min_number, @max_number)`,
+      `INSERT INTO raffles (name, prize, price, draw_date, alias, min_number, max_number, promo_qty, promo_price)
+       VALUES (@name, @prize, @price, @draw_date, @alias, @min_number, @max_number, @promo_qty, @promo_price)`,
     )
     .run(f);
   return { id: Number(lastInsertRowid) };

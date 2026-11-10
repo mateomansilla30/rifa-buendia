@@ -20,6 +20,8 @@ export interface Raffle {
   max_number: number;
   photo: string | null;
   active: number;
+  promo_qty: number; // 0 = sin promo. Ej: 3 números por promo_price
+  promo_price: number;
 }
 
 export interface Sale {
@@ -29,6 +31,7 @@ export interface Sale {
   buyer_name: string;
   contact: string;
   paid: number;
+  promo: number; // 1 = se vendió dentro de un pack de promo
   seller_id: number | null;
   notes: string;
   created_at: string;

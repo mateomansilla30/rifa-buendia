@@ -1,5 +1,6 @@
 import type { DB } from "./db";
 import { pad } from "./format";
+import { promoCount } from "./summary";
 import type { Raffle, Sale } from "./types";
 
 export class SaleError extends Error {
@@ -55,15 +56,18 @@ export function createSales(db: DB, raffle: Raffle, numbers: number[], input: Sa
   if (out.length) throw new SaleError(`Fuera de rango: ${out.join(", ")}`);
 
   const insert = db.prepare(
-    `INSERT INTO sales (raffle_id, number, buyer_name, contact, paid, seller_id, notes, created_at, updated_at)
-     VALUES (@raffle_id, @number, @buyer_name, @contact, @paid, @seller_id, @notes,
+    `INSERT INTO sales (raffle_id, number, buyer_name, contact, paid, promo, seller_id, notes, created_at, updated_at)
+     VALUES (@raffle_id, @number, @buyer_name, @contact, @paid, @promo, @seller_id, @notes,
              COALESCE(@created_at, strftime('%Y-%m-%dT%H:%M:%fZ','now')), strftime('%Y-%m-%dT%H:%M:%fZ','now'))`,
   );
+  // ponytail: la promo se aplica sola a los packs completos de una misma venta (4 con promo 3 = 3 en promo + 1 normal)
+  const inPromo = promoCount(raffle, nums.length);
   try {
     db.transaction(() => {
-      for (const number of nums) {
-        insert.run({ ...data, raffle_id: raffle.id, number, created_at: createdAt ?? null });
-        logAudit(db, raffle.id, number, userId, "alta", describe(data));
+      for (const [i, number] of nums.entries()) {
+        const promo = i < inPromo ? 1 : 0;
+        insert.run({ ...data, raffle_id: raffle.id, number, promo, created_at: createdAt ?? null });
+        logAudit(db, raffle.id, number, userId, "alta", describe(data) + (promo ? " · promo" : ""));
       }
     })();
   } catch (e) {

@@ -14,5 +14,9 @@ export function raffleFields(b: Record<string, unknown>) {
   if (!Number.isInteger(min_number) || !Number.isInteger(max_number) || min_number < 0 || max_number < min_number || max_number - min_number > 9999)
     throw new HttpError(400, "Rango de números inválido");
   if (draw_date && !/^\d{4}-\d{2}-\d{2}$/.test(draw_date)) throw new HttpError(400, "Fecha inválida");
-  return { name, prize: String(b.prize ?? "").trim(), price, draw_date, alias: String(b.alias ?? "").trim(), min_number, max_number };
+  const promo_qty = Number(b.promo_qty || 0);
+  const promo_price = Number(b.promo_price || 0);
+  if (!Number.isInteger(promo_qty) || !Number.isInteger(promo_price) || promo_qty < 0 || promo_price < 0 || promo_qty === 1 || (promo_qty > 1 && !promo_price))
+    throw new HttpError(400, "Promo inválida: poné cantidad (2 o más) y precio, o dejala vacía");
+  return { name, prize: String(b.prize ?? "").trim(), price, draw_date, alias: String(b.alias ?? "").trim(), min_number, max_number, promo_qty, promo_price };
 }
