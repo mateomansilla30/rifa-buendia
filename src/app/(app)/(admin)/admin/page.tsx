@@ -403,7 +403,10 @@ function AuditLog() {
 
   return (
     <section className={card}>
-      <H>Registro de cambios</H>
+      <div className="flex items-center justify-between gap-2">
+        <H>Registro de cambios</H>
+        <a href="/api/audit?format=csv" className={buttonVariants({ variant: "outline", size: "sm" })}><FileText /> Descargar todo (CSV)</a>
+      </div>
       {!entries ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
       ) : !entries.length ? (
